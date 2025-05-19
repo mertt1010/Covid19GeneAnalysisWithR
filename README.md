@@ -1,5 +1,5 @@
-MERT TOSUN 
-RESUL EKREM ÖZDEMİR
+MERT TOSUN  -
+RESUL EKREM ÖZDEMİR  -
 BEYTULLAH ALKAN
 
 # 🧬 COVID-19 ve Sağlıklı Bireyler Arasında Diferansiyel Gen Ekspresyonu Analizi
