@@ -1,0 +1,56 @@
+counts <- read.csv("GSE196822_Raw_counts_matrix.csv.gz", row.names = 1)
+
+head(counts)
+
+colnames(counts)
+
+sample_names <- colnames(counts)
+
+condition <- ifelse(grepl("^BK_Cov_", sample_names), "COVID", "Healthy")
+coldata <- data.frame(
+row.names = sample_names,
+condition = factor(condition)
+)
+
+table(coldata$condition)
+
+if (!requireNamespace("limma", quietly = TRUE)) {
+install.packages("limma")
+}
+
+if (!requireNamespace("edgeR", quietly = TRUE)) {
+install.packages("edgeR")
+}
+
+library(limma)
+
+library(edgeR)
+
+dge <- DGEList(counts = counts, group = coldata$condition)
+
+v <- voom(dge, plot = TRUE)
+
+design <- model.matrix(~ coldata$condition)
+
+fit <- lmFit(v, design)
+
+fit <- eBayes(fit)
+
+topTable(fit, coef = 2)
+
+res <- topTable(fit, coef = 2, number = Inf)
+
+res$gene <- rownames(res)
+
+library(ggplot2)
+
+ggplot(res, aes(x = logFC, y = -log10(P.Value))) +
+geom_point(alpha = 0.5) +
+geom_vline(xintercept = c(-1, 1), linetype = "dashed", color = "red") +
+geom_hline(yintercept = -log10(0.05), linetype = "dashed", color = "blue") +
+theme_minimal() +
+labs(title = "Volcano Plot", x = "Log2 Fold Change", y = "-log10(P-value)")
+
+significant_genes <- res[res$adj.P.Val < 0.05 & abs(res$logFC) > 1, ]
+
+write.csv(significant_genes, "significant_genes_COVID_vs_Healthy.csv")
